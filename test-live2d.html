@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live 2D 测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>Live 2D 看板娘测试页面</h1>
+        <div id="status" class="status warning">正在检测Live 2D功能...</div>
+        <p>如果右侧出现看板娘，则功能正常。如果没有出现，请检查浏览器控制台的错误信息。</p>
+        <button onclick="testResources()">重新测试资源加载</button>
+        <button onclick="checkConsole()">检查控制台</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
+    <script>
+        let statusDiv = document.getElementById('status');
+
+        function updateStatus(message, type = 'info') {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            console.log(`Live 2D: ${message}`);
+        }
+
+        function testResources() {
+            updateStatus('正在测试Live 2D资源加载...', 'warning');
+
+            // 测试Live 2D widget库
+            fetch('https://cdn.jsdelivr.net/npm/live2d-widget@3.1.4/lib/L2Dwidget.min.js')
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('Live 2D库加载成功', 'success');
+                        return fetch('https://unpkg.com/live2d-widget-model-koharu@1.0.5/assets/koharu.model.json');
+                    } else {
+                        throw new Error('Live 2D库加载失败');
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus('Live 2D模型文件加载成功，正在初始化...', 'success');
+                        initLive2D();
+                    } else {
+                        throw new Error('Live 2D模型文件加载失败');
+                    }
+                })
+                .catch(error => {
+                    updateStatus(`资源加载失败: ${error.message}`, 'error');
+                });
+        }
+
+        function initLive2D() {
+            try {
+                if (typeof L2Dwidget !== 'undefined') {
+                    L2Dwidget.init({
+                        "model": {
+                            "jsonPath": "https://unpkg.com/live2d-widget-model-koharu@1.0.5/assets/koharu.model.json",
+                            "scale": 1
+                        },
+                        "display": {
+                            "position": "right",
+                            "width": 150,
+                            "height": 300,
+                            "hOffset": 0,
+                            "vOffset": -20,
+                        },
+                        "mobile": {
+                            "show": true,
+                            "scale": 0.5
+                        },
+                        "react": {
+                            "opacityDefault": 0.7,
+                            "opacityOnHover": 0.2
+                        },
+                        "dialog": {
+                            "enable": true,
+                            "hitokoto": true
+                        }
+                    });
+                    updateStatus('Live 2D 看板娘初始化成功！请查看右侧是否显示看板娘', 'success');
+                } else {
+                    updateStatus('Live 2D 库加载异常，L2Dwidget对象不存在', 'error');
+                }
+            } catch (error) {
+                updateStatus(`Live 2D 初始化出错: ${error.message}`, 'error');
+            }
+        }
+
+        function checkConsole() {
+            console.log('=== Live 2D 调试信息 ===');
+            console.log('L2Dwidget对象存在:', typeof L2Dwidget);
+            console.log('L2Dwidget.init函数存在:', typeof (L2Dwidget && L2Dwidget.init));
+            console.log('页面中是否有canvas元素:', document.querySelector('canvas') !== null);
+            alert('请打开浏览器开发者工具(F12)查看Console标签页的调试信息');
+        }
+
+        // 页面加载完成后开始测试
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', testResources);
+        } else {
+            testResources();
+        }
+
+        // 监听错误
+        window.addEventListener('error', function(e) {
+            updateStatus(`JavaScript错误: ${e.message} (行${e.lineno})`, 'error');
+        });
+
+        // 监听未捕获的Promise错误
+        window.addEventListener('unhandledrejection', function(e) {
+            updateStatus(`Promise错误: ${e.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>
