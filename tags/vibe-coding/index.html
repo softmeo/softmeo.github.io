@@ -283,9 +283,6 @@
           <script src="https://fastly.jsdelivr.net/npm/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
 
 <script>
-  // 检测是否为移动端
-  var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
   L2Dwidget.init({
     "model": {
       "jsonPath": "https://fastly.jsdelivr.net/gh/Eikanya/Live2d-model@master/%E5%B4%A9%E5%9D%8F%E5%AD%A6%E5%9B%AD2/Kiana/model.json",
@@ -293,24 +290,17 @@
     },
     "display": {
       "position": "right",
-      // 根据设备动态调整画布大小
-      "width": isMobile ? 120 : 250, 
-      "height": isMobile ? 240 : 500,
-      "hOffset": isMobile ? 10 : 40,
-      "vOffset": isMobile ? -50 : -110 
+      "width": 220,      // 电脑端宽度
+      "height": 450,     // 电脑端高度
+      "hOffset": 50,     // 水平偏移
+      "vOffset": -100    // 隐藏腿部截断
     },
     "mobile": {
-      "show": true,
-      "scale": 0.5,        // 缩放比例，建议 0.5 以下以节省 GPU
-      "motion": false      // 手机端建议关闭动作捕捉，大幅提升加载速度
+      "show": false      // 修改此处：手机端彻底不显示
     },
     "react": {
-      "opacityDefault": 1.0,
+      "opacityDefault": 1.0, 
       "opacityOnHover": 0.2
-    },
-    "dialog": {
-      "enable": !isMobile, // 手机端屏幕小，建议关闭对话气泡，防止遮挡文章
-      "hitokoto": true
     }
   });
 </script>
